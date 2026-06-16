@@ -5,7 +5,7 @@
 
 ---
 
-## 🕒 Lịch trình thực hiện (4 Tiếng)
+## 🕒 Lịch trình thực hiện (4 Tiếng) 
 - **Giai đoạn 1 (45'):** Thiết kế Golden Dataset & Script SDG. Tạo ra ít nhất 50 test cases chất lượng.
 - **Giai đoạn 2 (90'):** Phát triển Eval Engine (RAGAS, Custom Judge) & Async Runner.
 - **Giai đoạn 3 (60'):** Chạy Benchmark, Phân cụm lỗi (Failure Clustering) & Phân tích "5 Whys".
