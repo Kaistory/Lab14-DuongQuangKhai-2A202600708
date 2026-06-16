@@ -1,0 +1,131 @@
+{
+  "course": "Hệ nhúng IT4210/IT4210E (Ver. 2025) - DCE-SOICT-HUST",
+  "kit": "STM32F429I-DISC1",
+  "labs": {
+    "1": {
+      "id": 1,
+      "title": "Bài thực hành 1 - GHÉP NỐI VỚI GPIO, INTERRUPT, TIMER",
+      "objective": [
+        "Củng cố kiến thức về các ngoại vi cơ bản của vi điều khiển: GPIO, ngắt ngoài (external interrupt), timer.",
+        "Thực hành ghép nối với LED đơn và LED 7 thanh.",
+        "Tìm hiểu chuẩn NEC Protocol ứng dụng trong điều khiển từ xa hồng ngoại; lập trình kết hợp ngắt ngoài và timer để nhận và giải mã lệnh.",
+        "Xây dựng ứng dụng đơn giản với LED 7 thanh và remote control."
+      ],
+      "preparation": {
+        "hardware": [
+          "Bộ KIT STM32F429-DISC",
+          "Điều khiển từ xa hồng ngoại",
+          "Module thu hồng ngoại HS0038",
+          "Module LED 7 thanh (2 module 5161AS)",
+          "LED đơn, điện trở 330Ω, transistor NPN, breadboard và dây nối"
+        ],
+        "software": ["STM32CubeIDE", "CubeMX", "Hercules"],
+        "documents": ["Tài liệu hướng dẫn thực hành", "Mã nguồn mẫu (Lab1_20242.zip)", "Datasheet HS0038"]
+      },
+      "sections": [
+        {"code": "3.0", "title": "Project mẫu", "guide": "Import Lab1_20242.zip vào STM32CubeIDE. Dịch và chạy: LED3/LED4 đảo trạng thái khi bấm đúp nút B1 là đúng. PA0 cấu hình External interrupt + Rising edge; CPU 180 MHz, timer 90 MHz; Timer 6 sinh ngắt 10000 Hz; xử lý bấm đúp trong stm32f4xx_it.c."},
+        {"code": "3.1", "title": "Ghép nối LED đơn", "guide": "Ghép 8 LED đơn với PD8–PD15 (qua điện trở 330Ω). Cấu hình PD8–PD15 là GPIO_Output. Khai báo biến LED_Value, thêm hàm DisplayLEDs(int mode) và gọi trong main loop để tạo hiệu ứng LED chạy."},
+        {"code": "3.2", "title": "Ghép nối LED 7 thanh", "guide": "Ghép 2 module LED 7 thanh: các chân thanh nối PE8–PE15, chân chọn module nối PG2 và PG3 (qua transistor NPN). Thêm 7seg.h/7seg.c, dùng HAL_TIM_Base_Start_IT(&htim6) + Set7SegDisplayValue(25) + Run7SegDisplay() để hiển thị số 25."},
+        {"code": "3.3", "title": "Giải mã tín hiệu điều khiển hồng ngoại (NEC)", "guide": "HS0038: chân Out→PG5, (-)→GND, (+)→3V. Dùng ngắt ngoài EXTI5 trên PG5 + timer để đo độ rộng các bit. Import project IrRemoteControl. Mở Hercules để xem mã lệnh nút bấm gửi về PC qua UART."}
+      ],
+      "exercises": [
+        "Viết thêm hiệu ứng cho DisplayLEDs theo mode: 1=Running spot L (phải→trái), 2=Running spot R (trái→phải), 3=Flash (bật/tắt cả 8 LED), 4=Spot bumper (2 LED đối xứng vào/ra).",
+        "Mỗi lần bấm nút B1 thì giá trị trên 2 module LED 7 thanh tăng 1 đơn vị.",
+        "Bài tập tự làm: giải mã lệnh hồng ngoại; hiển thị byte số 3 (Command) lên LED 7 thanh; nút OK bật/tắt LED4; nút 1–4 chạy hiệu ứng LED tương ứng phần 3.1.",
+        "Viết báo cáo giải thích nội dung phần 3 và 4 kèm hình ảnh và mã nguồn."
+      ],
+      "pin_mappings": {
+        "LED đơn": "PD8–PD15 (qua điện trở 330Ω), bit0→PD8 ... bit7→PD15",
+        "LED 7 thanh - thanh": "PE8–PE15 (qua điện trở 330Ω)",
+        "LED 7 thanh - chọn module": "PG2, PG3 (qua transistor NPN)",
+        "Nút B1 (User button)": "PA0 - External interrupt, Rising edge",
+        "HS0038 (thu hồng ngoại)": "Out→PG5 (EXTI5), (-)→GND, (+)→3V"
+      },
+      "nec_protocol": {
+        "summary": "Frame 32-bit = Address + ~Address + Command + ~Command, mỗi byte gửi LSB trước. Pulse burst 562.5µs điều chế 38 kHz.",
+        "start": "Burst 9ms + space 4.5ms (tổng ~13.5ms).",
+        "bit0": "Burst 562.5µs + space 562.5µs = 1.125ms.",
+        "bit1": "Burst 562.5µs + space 1687.5µs = 2.25ms.",
+        "stop": "Burst 562.5µs đánh dấu kết thúc 32 bit.",
+        "decode": "Đo thời gian bit: 13.5ms=start, 1.25ms=bit0, 2.25ms=bit1. Một lệnh giải mã đủ khi nhận 33 bit (1 start + 32 data)."
+      }
+    },
+    "2": {
+      "id": 2,
+      "title": "Bài thực hành 2 - GHÉP NỐI NỐI TIẾP (I2C, SPI)",
+      "objective": [
+        "Xây dựng mạch ghép nối với đầu đọc RFID, IC thời gian thực, màn hình OLED đồ họa.",
+        "Tìm hiểu chuẩn giao tiếp nối tiếp I2C, SPI; cách định địa chỉ và giao tiếp 1 master - nhiều slave trên bus I2C.",
+        "Lập trình ghép nối DS1307 (thời gian thực), OLED SH1106 (hiển thị), RC522 (đọc thẻ RFID 13.56 MHz).",
+        "Xây dựng ứng dụng mô phỏng đóng/mở cửa dựa vào mã thẻ RFID và ghi nhật ký đóng/mở cửa."
+      ],
+      "preparation": {
+        "hardware": [
+          "Bộ kit STM32F429I",
+          "Module Tiny RTC (DS1307 + AT24C32)",
+          "Màn hình OLED SH1106 1.3 inch",
+          "Module RFID RC522 và thẻ RFID 13.56 MHz"
+        ],
+        "software": ["STM32CubeIDE", "Hercules"],
+        "documents": ["Datasheet DS1307, AT24C32", "Mã nguồn thư viện sh1106.*, fonts.*, tm_stm32f4_mfrc522.*"]
+      },
+      "sections": [
+        {"code": "3.1", "title": "Tìm hiểu module DS1307 + AT24C32 Tiny RTC", "guide": "Module tích hợp DS1307 (RTC) + AT24C32 (EEPROM) + DS18B20 (nhiệt độ). DS1307 và AT24C32 dùng I2C. Cần xác định chân nguồn/tín hiệu và địa chỉ I2C của từng IC."},
+        {"code": "3.2", "title": "Tìm hiểu module OLED SH1106", "guide": "Màn hình đồ họa 128x64, giao tiếp I2C (chỉ cần SCL, SDA). Chú ý có 2 loại với thứ tự chân SCL/SDA ngược nhau."},
+        {"code": "3.3", "title": "Tìm hiểu module RC522 RFID reader", "guide": "Đọc/ghi thẻ RFID 13.56 MHz. Hỗ trợ UART/I2C/SPI nhưng module được hàn cứng chỉ dùng SPI."},
+        {"code": "3.4", "title": "Thiết kế sơ đồ mạch", "guide": "Nguồn: GND chung; SH1106 dùng 3V; TinyRTC: BAT→3V, VCC→5V; RC522: VCC→3V + tụ 100uF giữa 3V và GND. I2C: SCL/SDA từ CN3 hoặc PA8/PC9. SPI cho RC522: SS→PE4, SCK→PE2, MISO→PE5, MOSI→PE6, RST→3V. CHÚ Ý: chỉ cắm nguồn sau khi kiểm tra không chập VCC/GND."},
+        {"code": "3.5", "title": "Cấu hình STM32", "guide": "Tạo project mới: bật RCC, clock CPU 180 MHz; PE4 = GPIO_Output; cấu hình I2C3 (Fast Mode 400000), USART1 (115200 8N1), SPI4 (Full-Duplex Master, 8 bits, MSB first)."},
+        {"code": "3.6", "title": "Lập trình ghép nối DS1307", "guide": "Thêm struct Time và hàm TestDS1307() ghi/đọc thời gian qua HAL_I2C_Mem_Write/Read (địa chỉ 0xD0 ghi, 0xD1 đọc). Quan sát trên Hercules. Tách thành SetTime()/GetTime(); chỉ set một lần."},
+        {"code": "3.7", "title": "Lập trình ghép nối SH1106", "guide": "Thêm sh1106.*/fonts.*; gọi SH1106_Init(), SH1106_GotoXY(), SH1106_Puts(), SH1106_UpdateScreen() sau MX_I2C3_Init."},
+        {"code": "3.8", "title": "Lập trình với RC522", "guide": "Thêm tm_stm32f4_mfrc522.*; TM_MFRC522_Init(); trong vòng lặp dùng TM_MFRC522_Check(CardID) == MI_OK để phát hiện thẻ."}
+      ],
+      "exercises": [
+        "Viết lại TestDS1307() thành SetTime() và GetTime() với tham số phù hợp.",
+        "Đọc liên tục giá trị từ DS1307 và hiển thị thời gian lên SH1106.",
+        "Hiển thị mã thẻ (5 byte) đọc được từ RC522 lên SH1106.",
+        "Bài tập tổng hợp (3.9): RFID quẹt → LED3 bật khi có thẻ; mã thẻ khớp danh sách → LED4 bật + hiện 'Welcome' + lưu log (thời gian, mã thẻ); không khớp → 'Rejected'. Log trên RAM tối đa 100 bản ghi. Cho phép đặt mã thẻ / xem log qua UART (tự thiết kế giao thức lệnh)."
+      ],
+      "pin_mappings": {
+        "I2C3 (DS1307, SH1106)": "SCL/SDA từ CN3 hoặc PA8/PC9",
+        "SPI4 RC522 - SS": "PE4 (GPIO_Output)",
+        "SPI4 RC522 - SCK": "PE2",
+        "SPI4 RC522 - MISO": "PE5",
+        "SPI4 RC522 - MOSI": "PE6",
+        "RC522 - RST": "3V",
+        "DS1307 địa chỉ I2C": "0xD0 (ghi) / 0xD1 (đọc)",
+        "Nguồn": "SH1106→3V; TinyRTC BAT→3V, VCC→5V; RC522 VCC→3V + tụ 100uF"
+      }
+    },
+    "3": {
+      "id": 3,
+      "title": "Bài thực hành 3 - XÂY DỰNG ỨNG DỤNG VỚI FREERTOS VÀ TOUCHGFX",
+      "objective": [
+        "Lập trình với hệ điều hành FreeRTOS.",
+        "Lập trình xây dựng ứng dụng với framework TouchGFX.",
+        "Xây dựng ứng dụng đa chức năng: ghép nối ngoại vi với STM32F4; giao diện đồ họa, thực thi đa nhiệm với FreeRTOS và TouchGFX."
+      ],
+      "preparation": {
+        "hardware": ["Kit STM32F429I-DISC1", "mini-USB cable"],
+        "software": ["STM32CubeIDE 1.17.0", "TouchGFX 4.24.1 hoặc 4.25.0", "Hercules"],
+        "documents": ["Tài liệu thực hành", "Project mẫu SimpleRacing (đặt trong C:\\TouchGFXProjects)"]
+      },
+      "sections": [
+        {"code": "3.0", "title": "Làm quen với FreeRTOS", "guide": "Tạo project STM32CubeIDE: PG13/PG14 = Output; RCC + clock 90 MHz; USART1 Asynchronous 115200 bps; FreeRTOS Middleware interface CMSIS V2, thêm task myTask02. Lập trình defaultTask (nháy LED PG14 mỗi 500ms) và myTask02 (toggle PG13 + gửi 'Hello from user task' qua UART). Kết quả: LED PG13 nháy 1 Hz và chữ hiện trên Hercules."},
+        {"code": "3.1", "title": "Làm quen với TouchGFX và FreeRTOS", "guide": "Tạo project TouchGFX 'HelloTouchGFX' (board STM32F429, version 3.0.21). Đặt Circle (Radius=10) + Button 'LED control'. Thêm interaction buttonClicked() và tickEvent(). Generate code (F4), import .project vào STM32CubeIDE. Cấu hình PG13/PG14/PA0; override buttonClicked() (toggle PG13) và tickEvent() (di chuyển circle). Thêm queue myQueue01 + polling PA0 trong defaultTask để điều khiển animation."},
+        {"code": "3.2", "title": "Xây dựng ứng dụng đồng hồ bấm giây", "guide": "Project TouchGFX mới: đặt Image (watch face) + Texture Mapper (watch hand). Lập trình handleTickEvent() cập nhật góc kim (updateZAngle). Dùng osKernelGetTickCount() để lấy thời gian hệ thống (#include <cmsis_os.h>). Ghép nút USER_BUTTON (PA0) + queue để bật/tắt bấm giờ: không bấm thì kim đứng yên, bấm thì kim chạy."}
+      ],
+      "exercises": [
+        "Bài tập tự làm (3.4): từ project mẫu SimpleRacing, xây game đua xe — đường đua chạy từ trên xuống, xe di chuyển ngang. Điều khiển bằng 2 nút PG2/PG3 (input pull-up) hoặc joystick (1 kênh ADC).",
+        "Thêm tính năng: tăng tốc, sinh chướng ngại vật ngẫu nhiên, tính điểm, lưu và hiển thị High score.",
+        "Viết báo cáo mô tả chi tiết hoạt động phần cứng + phần mềm của game."
+      ],
+      "pin_mappings": {
+        "LED": "PG13, PG14 = GPIO_Output (PG13 LED xanh)",
+        "USER_BUTTON": "PA0 = GPIO_Input",
+        "UART": "USART1 Asynchronous 115200 bps",
+        "Game buttons (tùy chọn)": "PG2, PG3 = Input pull-up",
+        "FreeRTOS": "CMSIS V2, defaultTask + myTask02, osMessageQueue cho giao tiếp task↔GUI"
+      }
+    }
+  }
+}
