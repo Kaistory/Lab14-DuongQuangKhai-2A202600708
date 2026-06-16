@@ -60,15 +60,26 @@ Báo cáo 5 Whys phải chỉ ra được lỗi nằm ở đâu: Ingestion pipel
 # 1. Cài đặt dependencies
 pip install -r requirements.txt
 
-# 2. Tạo Golden Dataset (chạy trước khi benchmark)
+# 2. Tạo Golden Dataset (51 case, neo vào knowledge base)
 python data/synthetic_gen.py
 
-# 3. Chạy Benchmark & tạo reports
-python main.py
+# 3a. Chạy Benchmark THẬT (gọi LLM) — khuyến nghị gpt-4o-mini để khỏi đụng trần 30k TPM
+python main.py --model gpt-4o-mini --concurrency 2
+#    Test nhanh ít token:  python main.py --limit 6 --model gpt-4o-mini
 
-# 4. Kiểm tra định dạng trước khi nộp
+# 3b. HOẶC chạy benchmark MÔ PHỎNG offline (không tốn API): Retrieval đo thật,
+#     Generation do Claude tự chấm. Sinh reports V1 vs V2 + regression.
+python analysis/simulate_benchmark.py
+
+# 4. Phân cụm lỗi (5 Whys ở analysis/failure_analysis.md)
+python analysis/failure_cluster.py reports/benchmark_results_v1.json
+
+# 5. Kiểm tra định dạng trước khi nộp
 python check_lab.py
 ```
+
+> **Agent:** đã thay agent giả lập bằng **ReAct Agent thật** (`agent/main_agent.py` bọc `src/agent`), có 12 tool và knowledge base `data/embedded_labs.json`.
+> **Provider:** đặt trong `.env` (`DEFAULT_PROVIDER`, `OPENAI_API_KEY`/`GEMINI_API_KEY`). Multi-Judge dùng gpt-4o-mini + Gemini.
 
 ---
 

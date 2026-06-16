@@ -1,0 +1,29 @@
+{
+  "total": 51,
+  "attention_count": 6,
+  "by_layer": {
+    "GENERATION": 6
+  },
+  "by_type": {
+    "reasoning": 4,
+    "wrong_premise": 2
+  },
+  "by_lab": {
+    "Lab 1": 2,
+    "Lab 2": 1,
+    "Lab 0": 2,
+    "Lab 3": 1
+  },
+  "clusters": {
+    "GENERATION · reasoning": [
+      "lab1-nec-bit",
+      "lab2-ex-3.9",
+      "cross-pa0-usage",
+      "cross-hercules-why"
+    ],
+    "GENERATION · wrong_premise": [
+      "adv-wrong-premise-lab1-rfid",
+      "adv-wrong-premise-lab3-nec"
+    ]
+  }
+}
